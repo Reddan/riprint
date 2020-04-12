@@ -1,0 +1,4 @@
+*.pyc
+riprint.egg-info/
+/dist
+/build
