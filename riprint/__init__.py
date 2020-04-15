@@ -1,15 +1,22 @@
+import numpy as np
+import shutil
 from termcolor import colored
 
+dict_values = type({}.values())
+dict_keys = type({}.keys())
+list_types = (list, dict_values, dict_keys)
+
 bracket_colors = [
+  None,
   'red',
-  'green',
-  'yellow',
   'blue',
   'magenta',
   'cyan',
+  'grey',
 ]
 
 def _riprint(value, color, indent=0):
+  terminal_width = shutil.get_terminal_size((80, 0))[0]
   indent_str = '  ' * indent
   next_indent_str = indent_str + '  '
   bracket_color = color or bracket_colors[indent % len(bracket_colors)]
@@ -22,9 +29,9 @@ def _riprint(value, color, indent=0):
       return colored(f"{value}", color)
     else:
       return colored(f"'{value}'", color or 'green')
-  elif isinstance(value, (tuple, list, set)):
-    open_bracket = colored('[' if isinstance(value, list) else '(' if isinstance(value, tuple) else '{', bracket_color)
-    close_bracket = colored(']' if isinstance(value, list) else ')' if isinstance(value, tuple) else '}', bracket_color)
+  elif isinstance(value, (tuple, set, list_types)):
+    open_bracket = colored('[' if isinstance(value, list_types) else '(' if isinstance(value, tuple) else '{', bracket_color)
+    close_bracket = colored(']' if isinstance(value, list_types) else ')' if isinstance(value, tuple) else '}', bracket_color)
     children = [_riprint(val, color, indent + 1) for val in value]
     child_str = ', '.join(children)
     if len(child_str) <= 80 and '\n' not in child_str:
@@ -42,6 +49,20 @@ def _riprint(value, color, indent=0):
     ]
     child_str = ',\n'.join(children)
     return f"{open_bracket}\n{child_str}\n{indent_str}{close_bracket}"
+  elif isinstance(value, np.ndarray):
+    array_lines = np.array2string(
+      value,
+      max_line_width=terminal_width,
+      edgeitems=5,
+    ).splitlines()
+    if len(array_lines) == 1:
+      return array_lines[0]
+    else:
+      array_lines[0] = ' ' + array_lines[0][1:]
+      array_lines[-1] = array_lines[-1][:-1]
+      array_lines = [next_indent_str + line for line in array_lines]
+      array_str = '\n'.join(array_lines)
+      return f"ndarray [\n{array_str}\n{indent_str}]"
   return str(value)
 
 def riprint(*values, color=None, print=print, **kwargs):
