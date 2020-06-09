@@ -15,8 +15,10 @@ bracket_colors = [
   'grey',
 ]
 
+def get_terminal_width():
+  return shutil.get_terminal_size((80, 0))[0]
+
 def _riprint(value, color, indent=0):
-  terminal_width = shutil.get_terminal_size((80, 0))[0]
   indent_str = '  ' * indent
   next_indent_str = indent_str + '  '
   bracket_color = color or bracket_colors[indent % len(bracket_colors)]
@@ -34,7 +36,8 @@ def _riprint(value, color, indent=0):
     close_bracket = colored(']' if isinstance(value, list_types) else ')' if isinstance(value, tuple) else '}', bracket_color)
     children = [_riprint(val, color, indent + 1) for val in value]
     child_str = ', '.join(children)
-    if len(child_str) <= 80 and '\n' not in child_str:
+    terminal_width = get_terminal_width()
+    if len(child_str) <= terminal_width and '\n' not in child_str:
       return f"{open_bracket}{child_str}{close_bracket}"
     else:
       children = [next_indent_str + child for child in children]
@@ -48,11 +51,12 @@ def _riprint(value, color, indent=0):
       for key, val in value.items()
     ]
     child_str = ',\n'.join(children)
-    return f"{open_bracket}\n{child_str}\n{indent_str}{close_bracket}"
+    child_str = child_str and f"\n{child_str}\n{indent_str}"
+    return f"{open_bracket}{child_str}{close_bracket}"
   elif isinstance(value, np.ndarray):
     array_lines = np.array2string(
       value,
-      max_line_width=terminal_width,
+      max_line_width=get_terminal_width(),
       edgeitems=5,
     ).splitlines()
     if len(array_lines) == 1:

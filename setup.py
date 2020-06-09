@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
   name='riprint',
   packages=['riprint'],
-  version='1.0.3',
+  version='1.0.4',
   author='Hampus Hallman',
   author_email='me@hampushallman.com',
   url='https://github.com/Reddan/riprint',
