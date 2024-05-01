@@ -30,7 +30,7 @@ def _riprint(value, color, indent=0):
     if indent == 0:
       return colored(f"{value}", color)
     else:
-      return colored(f"'{value}'", color or 'green')
+      return colored(f'"{value}"', color or 'green')
   elif isinstance(value, (tuple, set, list_types)):
     open_bracket = colored('[' if isinstance(value, list_types) else '(' if isinstance(value, tuple) else '{', bracket_color)
     close_bracket = colored(']' if isinstance(value, list_types) else ')' if isinstance(value, tuple) else '}', bracket_color)
@@ -71,3 +71,5 @@ def _riprint(value, color, indent=0):
 
 def riprint(*values, color=None, print=print, **kwargs):
   print(*(_riprint(value, color) for value in values), **kwargs)
+
+print = riprint
